@@ -1,0 +1,279 @@
+/* 1. CSS Değişkenleri (Açık Tema - Varsayılan) */
+:root {
+    --bg-color: #f4f7f6;
+    --card-bg-color: #ffffff;
+    --text-color: #222222;
+    --text-color-light: #555555;
+    --border-color: #eeeeee;
+    --shadow-color: rgba(0, 0, 0, 0.08);
+    --accent-color: #007aff;
+    --score-red: #e63946;
+    --score-yellow: #fca311;
+    --score-green: #2a9d8f;
+}
+
+/* Koyu Tema Değişkenleri */
+body.dark-mode {
+    --bg-color: #1a1a1a;
+    --card-bg-color: #2a2a2a;
+    --text-color: #f0f0f0;
+    --text-color-light: #aaaaaa;
+    --border-color: #444444;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
+/* 2. Temel Stiller ve Sayfa Yapısı */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.6;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--card-bg-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px var(--shadow-color);
+    position: sticky; /* Üstte sabit kalır */
+    top: 0;
+    z-index: 100;
+}
+
+#theme-toggle {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+main {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.controls {
+    margin-bottom: 2rem;
+    text-align: right;
+}
+
+#compare-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#compare-button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+/* 3. Aday Kartı Grid (Responsive) */
+.candidate-grid {
+    display: grid;
+    /* Mobil: 1 sütun. 
+      Tablet ve Masaüstü: Ekran sığdıkça 280px'lik kartlar ekler.
+    */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.candidate-card {
+    position: relative; /* Checkbox'ı konumlandırmak için */
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 10px var(--shadow-color);
+    overflow: hidden;
+    text-align: center;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px var(--shadow-color);
+}
+
+.candidate-select {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    /* Kart tıklamasını (modal açma) engellememesi için */
+    z-index: 10; 
+}
+
+.card-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+    border: 3px solid var(--border-color);
+    object-fit: cover; /* Resimlerin orantılı görünmesi için */
+}
+
+.card-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.card-interests {
+    font-size: 0.9rem;
+    color: var(--text-color-light);
+    margin-bottom: 1rem;
+    /* Kartların boyunun eşit kalması için min yükseklik */
+    min-height: 2.7em; 
+}
+
+.card-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-color-light);
+}
+
+.score-badge {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    color: white;
+}
+
+/* İSTEK 2: Koşullu Skor Renkleri */
+.score-red { background-color: var(--score-red); }
+.score-yellow { background-color: var(--score-yellow); }
+.score-green { background-color: var(--score-green); }
+
+/* 4. Modal (Detay Sayfası) */
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Gizli state */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-container.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    position: relative;
+    background-color: var(--card-bg-color);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    /* İçeriğin girmesi için animasyon */
+    transform: translateY(-20px);
+    transition: transform 0.3s;
+}
+
+.modal-container.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-color-light);
+    cursor: pointer;
+}
+
+.modal-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+    border: 3px solid var(--border-color);
+    object-fit: cover;
+}
+
+#modal-name { margin-bottom: 0.5rem; }
+#modal-interests { color: var(--text-color-light); margin-bottom: 1rem; }
+.modal-score-container { margin-bottom: 1.5rem; font-size: 1.1rem; }
+
+.modal-contact {
+    text-align: left;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.modal-contact h3 { margin-bottom: 1rem; }
+.modal-contact a {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.modal-contact a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* 5. Genel Responsive Ayarlar */
+@media (max-width: 768px) {
+    header {
+        padding: 1rem;
+    }
+    main {
+        padding: 1rem;
+    }
+    .controls {
+        text-align: center;
+    }
+}
