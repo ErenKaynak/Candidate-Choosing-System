@@ -29,80 +29,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. BAŞLANGIÇ TEMASINI AYARLAMA (Sayfa Yüklendiğinde)
     // ----------------------------------------------------
-
-    // 1. Önce hafızada kayıtlı bir tercih var mı diye bakarız
     const savedTheme = localStorage.getItem('theme');
-    
-    // 2. Kayıt yoksa, kullanıcının sistem tercihine (tarayıcı/OS) bakarız
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
     let initialThemeIsDark = false;
-
     if (savedTheme) {
-        // Kayıtlı tercih varsa onu kullan
         initialThemeIsDark = (savedTheme === 'dark');
     } else {
-        // Kayıtlı tercih yoksa, sistem tercihini kullan
         initialThemeIsDark = prefersDark;
     }
-
-    // Başlangıç temasını uygula
     setTheme(initialThemeIsDark);
 
 
     // 4. BUTON TIKLAMA OLAYINI EKLEME (Event Listener)
     // ----------------------------------------------------
-    
     themeToggleBtn.addEventListener('click', () => {
-        // O anki temanın tersini uygula
         const isCurrentlyDark = body.classList.contains('dark-mode');
-        setTheme(!isCurrentlyDark); // "!" (değil) operatörü ile tersine çevir
+        setTheme(!isCurrentlyDark);
     });
     
     
     // ----------------------------------------------------
-    // YENİ KODLAR BURADAN BAŞLIYOR
+    // GÜNCELLENMİŞ KODLAR BURADAN BAŞLIYOR
     // ----------------------------------------------------
 
-    // 5. SAHTE VERİ (MOCK DATA)
+    // 5. YENİ: Google Apps Script API URL'miz
     // ----------------------------------------------------
-    // Google Sheets'ten çekeceğimiz verinin bir benzeri.
-    const mockCandidates = [
-        {
-            id: 'c1',
-            name: 'Elif Kaya',
-            interests: 'React, Node.js, Figma',
-            imageUrl: 'https://via.placeholder.com/150/DD6E42/FFFFFF?text=EK',
-            aiScore: 85,
-            email: 'elif.kaya@example.com',
-            phone: '555-123-4567'
-        },
-        {
-            id: 'c2',
-            name: 'Mehmet Öztürk',
-            interests: 'Python, Django, Veri Bilimi',
-            imageUrl: 'https://via.placeholder.com/150/4F6D7A/FFFFFF?text=MÖ',
-            aiScore: 62,
-            email: 'mehmet.ozturk@example.com',
-            phone: '555-987-6543'
-        },
-        {
-            id: 'c3',
-            name: 'Zeynep Demir',
-            interests: 'Flutter, Dart, Firebase',
-            imageUrl: 'https://via.placeholder.com/150/6A8D73/FFFFFF?text=ZD',
-            aiScore: 38,
-            email: 'zeynep.demir@example.com',
-            phone: '555-456-7890'
-        }
-    ];
+    // "Adım 4.2"de kopyaladığınız URL'yi buraya yapıştırın
+    // DİKKAT: Önceki adımdaki Google Apps Script'i oluşturup URL'yi buraya yapıştırmalısın.
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/..../exec'; // <--- BURAYI MUTLAKA DEĞİŞTİRİN
 
     // 6. GEREKLİ DİĞER HTML ELEMENTLERİNİ SEÇME
     // ----------------------------------------------------
     const candidateList = document.getElementById('candidate-list');
     const cardTemplate = document.getElementById('candidate-card-template');
-
-    // --> YENİ: Karşılaştırma butonu seçildi
     const compareButton = document.getElementById('compare-button');
     
     // Modal elementleri
@@ -115,8 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalEmail = document.getElementById('modal-email');
     const modalPhone = document.getElementById('modal-phone');
 
-    // --> YENİ: Seçilen adayları takip etmek için
+    // Seçilen adayları ve tüm veriyi tutmak için
     let selectedCandidates = [];
+    let allCandidatesData = []; // Tüm aday verisini burada saklayacağız
     const MAX_COMPARE_LIMIT = 10;
 
     // 7. YARDIMCI FONKSİYONLAR
@@ -124,11 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     /**
      * AI puanına göre CSS sınıfını döndürür (İstek 2)
-     * @param {number} score - 0-100 arası AI Puanı
      */
     function getScoreClass(score) {
-        if (score <= 49) return 'score-red';
-        if (score <= 69) return 'score-yellow';
+        // Gelen skorun bir sayı olduğundan emin olalım
+        const numericScore = parseInt(score, 10);
+        if (isNaN(numericScore)) return 'score-red'; // Hatalı veriye karşı
+        
+        if (numericScore <= 49) return 'score-red';
+        if (numericScore <= 69) return 'score-yellow';
         return 'score-green';
     }
 
@@ -136,27 +99,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
 
     /**
-     * Gelen aday verisine göre modalı (popup) doldurur ve gösterir.
-     * @param {object} candidate - Tek bir aday nesnesi
+     * Gelen aday ID'sine göre modalı (popup) doldurur ve gösterir.
+     * @param {string} candidateId - Tıklanan adayın ID'si (Timestamp kullanacağız)
      */
-    function openModal(candidate) {
-        // Verileri modal'a doldur
-        modalImage.src = candidate.imageUrl;
-        modalName.textContent = candidate.name;
-        modalInterests.textContent = candidate.interests;
-        modalScore.textContent = candidate.aiScore;
-        
-        // Puan rengini ayarla
-        modalScore.className = 'score-badge'; // Önceki renkleri sıfırla
-        modalScore.classList.add(getScoreClass(candidate.aiScore));
-        
-        // İletişim bilgilerini (mailto ve tel linkleri) ayarla
-        modalEmail.href = `mailto:${candidate.email}`;
-        modalPhone.href = `tel:${candidate.phone}`;
+    function openModalById(candidateId) {
+        // Tıklanan adayın tam verisini global diziden bul
+        const candidate = allCandidatesData.find(c => c.timestamp === candidateId);
+        if (!candidate) return; // Aday bulunamazsa dur
 
-        // Telefon veya e-posta yoksa gizle (opsiyonel)
-        modalEmail.style.display = candidate.email ? 'block' : 'none';
-        modalPhone.style.display = candidate.phone ? 'block' : 'none';
+        // Verileri modal'a doldur
+        // Google Apps Script'ten gelen (temizlenmiş) sütun adlarını kullanıyoruz
+        modalImage.src = candidate.cvnimizlePaylas || 'icons/default-avatar.png'; // Resim sütunu (varsa)
+        modalName.textContent = candidate.adSoyad;
+        modalInterests.textContent = candidate.tecrubenOlanTeknolojiler;
+        modalScore.textContent = candidate.aIGenelSkor;
+        
+        modalScore.className = 'score-badge'; // Önceki renkleri sıfırla
+        modalScore.classList.add(getScoreClass(candidate.aIGenelSkor));
+        
+        // Google Sheet'ten e-posta ve telefon gelip gelmediğini kontrol et
+        const email = candidate.email; // Sütun adını kendi sheet'inize göre ayarlayın
+        const phone = candidate.phone; // Sütun adını kendi sheet'inize göre ayarlayın
+
+        if (email) {
+            modalEmail.href = `mailto:${email}`;
+            modalEmail.style.display = 'block';
+        } else {
+            modalEmail.style.display = 'none';
+        }
+
+        if (phone) {
+            modalPhone.href = `tel:${phone}`;
+            modalPhone.style.display = 'block';
+        } else {
+            modalPhone.style.display = 'none';
+        }
         
         // Modalı göster
         modalContainer.classList.add('show');
@@ -174,49 +151,49 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Array<object>} candidates - Aday nesnelerinden oluşan dizi
      */
     function displayCandidates(candidates) {
-        // Yeni kartları eklemeden önce listeyi temizle
-        candidateList.innerHTML = ''; 
+        candidateList.innerHTML = ''; // Listeyi temizle
 
-        candidates.forEach(candidate => {
-            // 1. HTML şablonunu (template) kopyala
+        // Sadece AI değerlendirmesi tamamlanmış olanları filtrele
+        const evaluatedCandidates = candidates.filter(c => c.aIDegerlendirmeDurumu === 'Değerlendirildi');
+
+        if (evaluatedCandidates.length === 0) {
+             candidateList.innerHTML = '<p class="loading-message">Değerlendirilmiş aday bulunamadı.</p>';
+             return;
+        }
+
+        evaluatedCandidates.forEach(candidate => {
             const card = cardTemplate.content.cloneNode(true).children[0];
 
-            // 2. Şablon içindeki elementleri seç
             const image = card.querySelector('.card-image');
             const name = card.querySelector('.card-name');
             const interests = card.querySelector('.card-interests');
             const scoreBadge = card.querySelector('.score-badge');
             const checkbox = card.querySelector('.candidate-select');
 
-            // 3. Verileri elementlere doldur
-            image.src = candidate.imageUrl;
-            name.textContent = candidate.name;
-            interests.textContent = candidate.interests;
-            scoreBadge.textContent = candidate.aiScore;
+            // Google Apps Script'ten gelen (temizlenmiş) sütun adlarını kullanıyoruz
+            image.src = candidate.cvnimizlePaylas || 'icons/default-avatar.png'; // Resim (varsa)
+            name.textContent = candidate.adSoyad;
+            interests.textContent = candidate.tecrubenOlanTeknolojiler;
+            scoreBadge.textContent = candidate.aIGenelSkor;
             
-            // Veriyle checkbox'ın değerini ayarla (Karşılaştırma için)
-            checkbox.value = candidate.id;
+            // ID olarak Google Sheet'teki benzersiz Timestamp'i (Zaman Damgası) kullanalım
+            const candidateId = candidate.timestamp; 
+            checkbox.value = candidateId;
+            checkbox.checked = selectedCandidates.includes(candidateId);
 
-            // --> GÜNCELLENDİ: Sayfa yüklendiğinde seçili olanları işaretler
-            checkbox.checked = selectedCandidates.includes(candidate.id);
+            scoreBadge.classList.add(getScoreClass(candidate.aIGenelSkor));
 
-            // 4. AI Puanına göre renk sınıfını ekle (İstek 2)
-            scoreBadge.classList.add(getScoreClass(candidate.aiScore));
-
-            // 5. Olay Dinleyicilerini Ekle
-            
             // Karta tıklandığında modalı aç (İstek 3)
             card.addEventListener('click', () => {
-                openModal(candidate);
+                openModalById(candidateId);
             });
             
-            // --> GÜNCELLENDİ: Checkbox'a tıklandığında seçim mantığını çağırır
+            // Checkbox'a tıklandığında seçim mantığını çağırır
             checkbox.addEventListener('click', (event) => {
-                event.stopPropagation(); 
-                handleCandidateSelection(checkbox, candidate.id);
+                event.stopPropagation(); // Modal'ın açılmasını engelle
+                handleCandidateSelection(checkbox, candidateId);
             });
 
-            // 6. Hazırlanan kartı listeye ekle
             candidateList.appendChild(card);
         });
     }
@@ -224,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal'ı kapatma olaylarını ekle
     modalCloseBtn.addEventListener('click', closeModal);
     modalContainer.addEventListener('click', (event) => {
-        // Eğer tıklanan yer modal'ın dışı (gri arka plan) ise kapat
         if (event.target === modalContainer) {
             closeModal();
         }
@@ -233,28 +209,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 9. SAYFAYI BAŞLATMA
     // ----------------------------------------------------
     
-    // --> GÜNCELLENDİ: updateCompareButton fonksiyonu artık dolu
     /**
      * Checkbox tıklandığında seçilen aday listesini günceller.
-     * @param {HTMLInputElement} checkbox - Tıklanan checkbox
-     * @param {string} candidateId - Adayın ID'si
      */
     function handleCandidateSelection(checkbox, candidateId) {
         if (checkbox.checked) {
-            // Adayı ekle
             if (selectedCandidates.length < MAX_COMPARE_LIMIT) {
                 selectedCandidates.push(candidateId);
             } else {
-                // Limite ulaşıldı, seçime izin verme
                 checkbox.checked = false;
                 alert(`Karşılaştırma için en fazla ${MAX_COMPARE_LIMIT} aday seçebilirsiniz.`);
             }
         } else {
-            // Adayı çıkar
             selectedCandidates = selectedCandidates.filter(id => id !== candidateId);
         }
-        
-        // Butonu güncelle
         updateCompareButton();
     }
 
@@ -273,9 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --> YENİ: Karşılaştır butonuna tıklama olayı
+    // Karşılaştır butonuna tıklama olayı
     compareButton.addEventListener('click', () => {
-        // Bu fonksiyon n8n'e veriyi gönderecek
         handleCompareRequest();
     });
 
@@ -300,9 +267,34 @@ document.addEventListener('DOMContentLoaded', () => {
         // .catch(error => console.error('n8n hatası:', error));
         // -------------------------------------------------
     }
-    // --------------------
-    
-    // Sahte verilerimizi kullanarak kartları ekrana çizdir!
-    displayCandidates(mockCandidates);
+
+    /**
+     * Google Apps Script API'sinden aday verilerini çeker ve ekranı doldurur.
+     */
+    async function fetchCandidates() {
+        candidateList.innerHTML = '<p class="loading-message">Adaylar yükleniyor...</p>';
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL);
+            if (!response.ok) {
+                throw new Error(`HTTP hatası! Durum: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            if (data.error) {
+                 throw new Error(`API Hatası: ${data.error}`);
+            }
+            
+            allCandidatesData = data; 
+            displayCandidates(allCandidatesData);
+
+        } catch (error) {
+            console.error('Veri çekme hatası:', error);
+            candidateList.innerHTML = '<p class="error-message">Adaylar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
+        }
+    }
+
+    // Sahte veriler yerine artık bu fonksiyonu çağırıyoruz!
+    fetchCandidates();
 
 }); // DOMContentLoaded sonu
