@@ -76,8 +76,12 @@ main {
 }
 
 .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Ekran küçülünce alt satıra geçsin */
+    gap: 1rem;
     margin-bottom: 2rem;
-    text-align: right;
 }
 
 #compare-button {
@@ -95,6 +99,21 @@ main {
 #compare-button:disabled {
     background-color: #aaa;
     cursor: not-allowed;
+}
+
+.filter-sort-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.controls select {
+    padding: 0.75rem;
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
 }
 
 /* 3. Aday Kartı Grid (Responsive) */
@@ -263,6 +282,121 @@ main {
     margin-right: 10px;
     width: 20px;
     text-align: center;
+}
+
+.contact-button {
+    background-color: var(--accent-color);
+    color: white !important;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-align: center;
+    transition: background-color 0.2s;
+    display: block; /* Butonların tam genişlikte olması için */
+    margin-bottom: 10px !important; /* Butonlar arasına boşluk ekle */
+}
+
+.contact-button:hover {
+    background-color: #0056b3; /* Koyu mavi */
+}
+
+.modal-ai-details {
+    text-align: left;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.modal-ai-details h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.modal-ai-details h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.modal-ai-details p {
+    font-size: 0.9rem;
+    color: var(--text-color-light);
+}
+
+/* YENİ: Karşılaştırma Modalı Stilleri */
+.compare-modal-content {
+    max-width: 90%;
+    width: 1200px; 
+}
+
+/* compare-grid-content id'li div'i flex container yapıyoruz */
+#compare-grid-content {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    margin-top: 1.5rem;
+    padding-bottom: 1rem; /* Kaydırma çubuğu için boşluk */
+}
+
+.compare-column {
+    flex: 1 1 300px; /* Esnek, küçülebilir, 300px taban genişlik */
+    min-width: 280px; /* Minimum genişlik */
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.compare-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem; /* Resmi yatayda ortala */
+    border: 3px solid var(--border-color);
+}
+
+.compare-column h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.compare-attribute {
+    text-align: left;
+    margin-bottom: 1.25rem;
+}
+
+.compare-attribute label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-color-light);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.compare-attribute p,
+.compare-attribute .score-badge {
+    font-size: 1rem;
+}
+
+
+/* YENİ: Yüklenme Animasyonu (Spinner) */
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 4rem auto; /* Ortalamak için */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* 5. Genel Responsive Ayarlar */
