@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aday Değerlendirme Paneli</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="theme-color" content="#ffffff"/> <link rel="stylesheet" href="style.css">
+    <script>
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center;">
+            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
+            <h1>Aday Paneli</h1>
+            <div class="dropdown">
+                <button class="dropdown-button">Linkler <i class="fas fa-chevron-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="#" id="google-sheet-link">Google Sheets</a>
+                    <a href="#" id="google-form-link">Google Form</a>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <a href="developer.html" style="color: var(--text-color); text-decoration: none; font-size: 1.2rem;">Geliştirici</a>
+            <button id="logout-button" style="background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer;" aria-label="Çıkış Yap"><i class="fas fa-power-off"></i></button>
+            <button id="theme-toggle" aria-label="Temayı değiştir">🌙</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="controls">
+            <div class="filter-sort-controls">
+                <select id="filter-by-score" aria-label="Puana göre filtrele">
+                    <option value="all">Tüm Puanlar</option>
+                    <option value="high">Yüksek Puan (70+)</option>
+                    <option value="medium">Orta Puan (50-69)</option>
+                    <option value="low">Düşük Puan (0-49)</option>
+                </select>
+                <select id="sort-by" aria-label="Sırala">
+                    <option value="score-desc">Puana Göre (Önce Yüksek)</option>
+                    <option value="score-asc">Puana Göre (Önce Düşük)</option>
+                    <option value="name-asc">İsme Göre (A-Z)</option>
+                </select>
+            </div>
+            <button id="refresh-button" class="control-button">Yenile</button>
+            <button id="compare-button" disabled>Seçilenleri Karşılaştır (0)</button>
+        </div>
+
+                <div id="loader-container" class="loader-container">
+                    <div class="loader"></div>
+                </div>
+                <div id="candidate-list" class="candidate-grid">
+                </div>    </main>
+
+    <template id="candidate-card-template">
+        <div class="candidate-card">
+            <input type="checkbox" class="candidate-select" aria-label="Adayı seç">
+            
+            <img src="icons/default-avatar.png" alt="Profil Resmi" class="card-image">
+            <h2 class="card-name">Aday Adı</h2>
+            <p class="card-interests">İlgi Alanları</p>
+            <div class="card-score">
+                <span>AI Puanı</span>
+                <span class="score-badge">0</span>
+            </div>
+        </div>
+    </template>
+
+    <div id="modal-container" class="modal-container">
+        <div class="modal-content">
+            <button id="modal-close" class="modal-close">&times;</button>
+            <img src="icons/default-avatar.png" alt="Profil Resmi" id="modal-image" class="modal-image">
+            <h2 id="modal-name">Aday Adı</h2>
+            <p id="modal-interests"></p>
+            <div class="modal-score-container">
+                AI Puanı: <span id="modal-score" class="score-badge">0</span>
+            </div>
+            <div class="modal-contact">
+                <h3>İletişim Bilgileri</h3>
+                <a id="modal-email" href="#" class="contact-button"><i class="fas fa-envelope"></i> E-posta Gönder</a>
+                <a id="modal-phone" href="#" class="contact-button"><i class="fas fa-phone"></i> Telefonla Ara</a>
+            </div>
+            <div id="modal-ai-details" class="modal-ai-details">
+                <h3>AI Değerlendirmesi</h3>
+                <div id="modal-ai-guclu">
+                    <h4>Güçlü Yanlar</h4>
+                    <p></p>
+                </div>
+                <div id="modal-ai-riskler">
+                    <h4>Riskler</h4>
+                    <p></p>
+                </div>
+                <div id="modal-ai-gerekce">
+                    <h4>Kısa Gerekçe</h4>
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YENİ: Karşılaştırma Modalı -->
+    <div id="compare-modal-container" class="modal-container">
+        <div class="modal-content compare-modal-content">
+            <button id="compare-modal-close" class="modal-close">&times;</button>
+            <h2>Adayları Karşılaştır</h2>
+            <div id="compare-grid-content" class="compare-grid">
+                <!-- Karşılaştırılacak adaylar buraya dinamik olarak eklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js" defer></script>
+    
+    <script src="script.js" defer></script>
+</body>
+</html>

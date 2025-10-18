@@ -3,100 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aday Değerlendirme Paneli</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <meta name="theme-color" content="#ffffff"/> <link rel="stylesheet" href="style.css">
+    <title>Kovan Studio Aday Paneli</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>Aday Paneli</h1>
-        <button id="theme-toggle" aria-label="Temayı değiştir">🌙</button>
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; width: 200px;">
+            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
+            <span style="font-size: 1.2rem; font-weight: bold;">Kovan Studio</span>
+        </div>
+        <h1 style="font-size: 1.5rem; text-align: center; flex-grow: 1;">Aday Paneli</h1>
+        <div style="width: 200px; display: flex; justify-content: flex-end;">
+            <button id="theme-toggle" aria-label="Temayı değiştir">🌙</button>
+        </div>
     </header>
 
     <main>
-        <div class="controls">
-            <div class="filter-sort-controls">
-                <select id="filter-by-score" aria-label="Puana göre filtrele">
-                    <option value="all">Tüm Puanlar</option>
-                    <option value="high">Yüksek Puan (70+)</option>
-                    <option value="medium">Orta Puan (50-69)</option>
-                    <option value="low">Düşük Puan (0-49)</option>
-                </select>
-                <select id="sort-by" aria-label="Sırala">
-                    <option value="score-desc">Puana Göre (Önce Yüksek)</option>
-                    <option value="score-asc">Puana Göre (Önce Düşük)</option>
-                    <option value="name-asc">İsme Göre (A-Z)</option>
-                </select>
+        <form id="login-form" style="max-width: 400px; margin: 2rem auto; padding: 2rem; background-color: var(--card-bg-color); border-radius: 12px; box-shadow: 0 4px 10px var(--shadow-color);">
+            <div style="margin-bottom: 1rem;">
+                <label for="username" style="display: block; margin-bottom: 0.5rem;">Kullanıcı Adı</label>
+                <input type="text" id="username" name="username" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-color); color: var(--text-color);">
             </div>
-            <button id="compare-button" disabled>Seçilenleri Karşılaştır (0)</button>
-        </div>
-
-        <div id="candidate-list" class="candidate-grid">
+            <div style="margin-bottom: 1.5rem;">
+                <label for="password" style="display: block; margin-bottom: 0.5rem;">Şifre</label>
+                <input type="password" id="password" name="password" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-color); color: var(--text-color);">
             </div>
+            <button type="submit" style="width: 100%; padding: 0.75rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Giriş Yap</button>
+            <p id="error-message" style="color: var(--score-red); margin-top: 1rem; text-align: center; display: none;">Kullanıcı adı veya şifre yanlış.</p>
+        </form>
     </main>
 
-    <template id="candidate-card-template">
-        <div class="candidate-card">
-            <input type="checkbox" class="candidate-select" aria-label="Adayı seç">
-            
-            <img src="icons/default-avatar.png" alt="Profil Resmi" class="card-image">
-            <h2 class="card-name">Aday Adı</h2>
-            <p class="card-interests">İlgi Alanları</p>
-            <div class="card-score">
-                <span>AI Puanı</span>
-                <span class="score-badge">0</span>
-            </div>
-        </div>
-    </template>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-    <div id="modal-container" class="modal-container">
-        <div class="modal-content">
-            <button id="modal-close" class="modal-close">&times;</button>
-            <img src="icons/default-avatar.png" alt="Profil Resmi" id="modal-image" class="modal-image">
-            <h2 id="modal-name">Aday Adı</h2>
-            <p id="modal-interests"></p>
-            <div class="modal-score-container">
-                AI Puanı: <span id="modal-score" class="score-badge">0</span>
-            </div>
-            <div class="modal-contact">
-                <h3>İletişim Bilgileri</h3>
-                <a id="modal-email" href="#" class="contact-button"><i class="fas fa-envelope"></i> E-posta Gönder</a>
-                <a id="modal-phone" href="#" class="contact-button"><i class="fas fa-phone"></i> Telefonla Ara</a>
-            </div>
-            <div id="modal-ai-details" class="modal-ai-details">
-                <h3>AI Değerlendirmesi</h3>
-                <div id="modal-ai-guclu">
-                    <h4>Güçlü Yanlar</h4>
-                    <p></p>
-                </div>
-                <div id="modal-ai-riskler">
-                    <h4>Riskler</h4>
-                    <p></p>
-                </div>
-                <div id="modal-ai-gerekce">
-                    <h4>Kısa Gerekçe</h4>
-                    <p></p>
-                </div>
-            </div>
-        </div>
-    </div>
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
 
-    <!-- YENİ: Karşılaştırma Modalı -->
-    <div id="compare-modal-container" class="modal-container">
-        <div class="modal-content compare-modal-content">
-            <button id="compare-modal-close" class="modal-close">&times;</button>
-            <h2>Adayları Karşılaştır</h2>
-            <div id="compare-grid-content" class="compare-grid">
-                <!-- Karşılaştırılacak adaylar buraya dinamik olarak eklenecek -->
-            </div>
-        </div>
-    </div>
+            // Bu kısımda kullanıcı adı ve şifreyi kontrol edebilirsiniz.
+            // Örnek olarak, basit bir kontrol yapalım:
+            if (username === 'kovan.studio' && password === 'candidatepanel') {
+                // Giriş başarılı, sessionStorage'a bir flag ekle ve ana sayfaya yönlendir
+                sessionStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                // Hatalı giriş, hata mesajını göster
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js" defer></script>
-    
-    <script src="script.js" defer></script>
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggleBtn.innerHTML = '☀️';
+                themeToggleBtn.setAttribute('aria-label', 'Açık temaya geç');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggleBtn.innerHTML = '🌙';
+                themeToggleBtn.setAttribute('aria-label', 'Koyu temaya geç');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let initialThemeIsDark = false;
+        if (savedTheme) {
+            initialThemeIsDark = (savedTheme === 'dark');
+        } else {
+            initialThemeIsDark = prefersDark;
+        }
+        setTheme(initialThemeIsDark);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const isCurrentlyDark = body.classList.contains('dark-mode');
+            setTheme(!isCurrentlyDark);
+        });
+    </script>
 </body>
 </html>

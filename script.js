@@ -1,34 +1,22 @@
-// DOM yüklendiğinde tüm kodumuzun çalışmasını sağlarız
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. GEREKLİ HTML ELEMENTLERİNİ SEÇME
-    // ----------------------------------------------------
-    const themeToggleBtn = document.getElementById('theme-toggle');
     const body = document.body;
+    const themeToggleBtn = document.getElementById('theme-toggle');
 
-    // 2. TEMA FONKSİYONLARI
-    // ----------------------------------------------------
-    
-    /**
-     * Temayı ayarlar ve tarayıcı hafızasına kaydeder.
-     * @param {boolean} isDark - Tema koyu moda mı ayarlanacak?
-     */
     function setTheme(isDark) {
         if (isDark) {
             body.classList.add('dark-mode');
-            themeToggleBtn.innerHTML = '☀️'; // Buton ikonunu güneşe çevir
+            themeToggleBtn.innerHTML = '☀️';
             themeToggleBtn.setAttribute('aria-label', 'Açık temaya geç');
-            localStorage.setItem('theme', 'dark'); // Tercihi hafızaya kaydet
+            localStorage.setItem('theme', 'dark');
         } else {
             body.classList.remove('dark-mode');
-            themeToggleBtn.innerHTML = '🌙'; // Buton ikonunu aya çevir
+            themeToggleBtn.innerHTML = '🌙';
             themeToggleBtn.setAttribute('aria-label', 'Koyu temaya geç');
-            localStorage.setItem('theme', 'light'); // Tercihi hafızaya kaydet
+            localStorage.setItem('theme', 'light');
         }
     }
 
-    // 3. BAŞLANGIÇ TEMASINI AYARLAMA (Sayfa Yüklendiğinde)
-    // ----------------------------------------------------
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     let initialThemeIsDark = false;
@@ -39,9 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setTheme(initialThemeIsDark);
 
-
-    // 4. BUTON TIKLAMA OLAYINI EKLEME (Event Listener)
-    // ----------------------------------------------------
     themeToggleBtn.addEventListener('click', () => {
         const isCurrentlyDark = body.classList.contains('dark-mode');
         setTheme(!isCurrentlyDark);
@@ -228,16 +213,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (email) {
             modalEmail.href = `mailto:${email}`;
+            modalEmail.textContent = email;
             modalEmail.style.display = 'block';
         } else {
-            modalEmail.style.display = 'none';
+            modalEmail.textContent = 'E-posta adresi bulunamadı.';
+            modalEmail.href = '#';
+            modalEmail.style.display = 'block';
         }
 
         if (phone) {
             modalPhone.href = `tel:${phone}`;
+            modalPhone.textContent = phone;
             modalPhone.style.display = 'block';
         } else {
-            modalPhone.style.display = 'none';
+            modalPhone.textContent = 'Telefon numarası bulunamadı.';
+            modalPhone.href = '#';
+            modalPhone.style.display = 'block';
         }
 
         // YENİ: AI Detaylarını doldur
@@ -390,7 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * Google Apps Script API'sinden aday verilerini çeker ve ekranı doldurur.
      */
     async function fetchCandidates() {
-        candidateList.innerHTML = '<div class="loader"></div>'; // Yükleniyor animasyonunu göster
+        const loaderContainer = document.getElementById('loader-container');
+        loaderContainer.style.display = 'flex';
 
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL);
@@ -409,10 +401,58 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Veri çekme hatası:', error);
             candidateList.innerHTML = '<p class="error-message">Adaylar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
+        } finally {
+            loaderContainer.style.display = 'none';
         }
     }
 
-    // Sahte veriler yerine artık bu fonksiyonu çağırıyoruz!
-    fetchCandidates();
+    async function init() {
+        await fetchCandidates();
 
-}); // DOMContentLoaded sonu
+        const refreshButton = document.getElementById('refresh-button');
+
+        refreshButton.addEventListener('click', () => {
+            const loaderContainer = document.getElementById('loader-container');
+            loaderContainer.style.display = 'flex';
+
+            const n8nWebhookUrl = 'https://short-fly-68.hooks.n8n.cloud/webhook-test/86789385-940b-46d8-bceb-7a1ab0f4caa0';
+
+            fetch(n8nWebhookUrl, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        // Wait a bit for n8n to process and then reload the candidates
+                        setTimeout(() => {
+                            fetchCandidates();
+                        }, 5000); // 5 seconds delay
+                    } else {
+                        throw new Error('n8n workflow could not be triggered.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error triggering n8n workflow:', error);
+                    candidateList.innerHTML = '<p class="error-message">CVler yenilenemedi. Lütfen daha sonra tekrar deneyin.</p>';
+                    loaderContainer.style.display = 'none';
+                });
+        });
+
+        const googleSheetLink = document.getElementById('google-sheet-link');
+        const googleFormLink = document.getElementById('google-form-link');
+
+        googleSheetLink.addEventListener('click', () => {
+            window.open('https://docs.google.com/spreadsheets/d/1pIlRUZ3ZI3PQgGNAks97l5pbGR1hXQPljpApnK1BW0s/edit?gid=1478236436#gid=1478236436', '_blank');
+        });
+
+        googleFormLink.addEventListener('click', () => {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLScdpPrUJ_Le-P25aIwUHAPVFqKX3T-jVAyviThaj_zuw48tjQ/viewform', '_blank');
+        });
+
+        const logoutButton = document.getElementById('logout-button');
+        logoutButton.addEventListener('click', () => {
+            sessionStorage.removeItem('isLoggedIn');
+            window.location.href = 'index.html';
+        });
+    }
+
+    init();
+
+});

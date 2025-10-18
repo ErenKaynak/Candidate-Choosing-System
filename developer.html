@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geliştirici Sayfası</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center;">
+            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
+            <h1>Geliştirici Sayfası</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <a href="dashboard.html" style="color: var(--text-color); text-decoration: none; font-size: 1.2rem;">Ana Sayfa</a>
+        </div>
+    </header>
+
+    <main>
+        <h2>Bu sayfa yapım aşamasındadır.</h2>
+        <p>Çok yakında burada olacak...</p>
+    </main>
+
+</body>
+</html>
