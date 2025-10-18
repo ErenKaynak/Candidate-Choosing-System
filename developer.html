@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geliştirici Sayfası</title>
+    <title>Proje Hakkında</title>
     <link rel="stylesheet" href="style.css">
     <script>
         if (sessionStorage.getItem('isLoggedIn') !== 'true') {
@@ -14,19 +14,87 @@
 <body>
 
     <header>
-        <div style="display: flex; align-items: center;">
-            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
-            <h1>Geliştirici Sayfası</h1>
+        <div class="header-left">
+            <a href="dashboard.html" style="background: none; border: none; font-size: 1.2rem; color: var(--text-color); cursor: pointer; text-decoration: none;">Ana Sayfa</a>
         </div>
-        <div style="display: flex; align-items: center; gap: 1.5rem;">
-            <a href="dashboard.html" style="color: var(--text-color); text-decoration: none; font-size: 1.2rem;">Ana Sayfa</a>
+        <div class="header-center">
+            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
+            <h1>Proje Hakkında</h1>
+        </div>
+        <div class="header-right">
+            <button id="theme-toggle" aria-label="Temayı değiştir" style="background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer;">🌙</button>
         </div>
     </header>
 
     <main>
-        <h2>Bu sayfa yapım aşamasındadır.</h2>
-        <p>Çok yakında burada olacak...</p>
+        <div class="about-container">
+            <h2>Proje ve Geliştirici Hakkında</h2>
+            <p>Bu proje, bir aday değerlendirme sürecini basitleştirmek ve otomatize etmek amacıyla <b>Eren Kaynak</b> tarafından yaklaşık 12 saatte geliştirilmiştir.</p>
+
+            <h2>Teknoloji ve Araçlar</h2>
+            <p>Proje, modern web teknolojileri ve otomasyon araçları kullanılarak geliştirilmiştir. İşte kullanılan araçlar ve kullanım amaçları:</p>
+            <ul>
+                <li><strong>HTML:</strong> Web sayfasının temel iskeletini ve içeriğini oluşturmak için kullanıldı.</li>
+                <li><strong>CSS:</strong> Uygulamanın görsel tasarımını, renk paletini, tipografisini ve genel yerleşimini şekillendirmek için kullanıldı.</li>
+                <li><strong>JavaScript:</strong> Kullanıcı etkileşimlerini yönetmek, dinamik içerik oluşturmak ve API entegrasyonlarını sağlamak için kullanıldı.</li>
+                <li><strong>Google Apps Script:</strong> Google Sheets ve Google Forms ile sunucusuz bir backend oluşturmak, verileri okumak, işlemek ve otomasyonları tetiklemek için kullanıldı.</li>
+                <li><strong>n8n:</strong> Farklı servisler arasında karmaşık veri akışlarını ve otomasyonları (workflow) yönetmek için kullanıldı.</li>
+                <li><strong>ngrok:</strong> Geliştirme aşamasında lokal sunucuyu (n8n) güvenli bir şekilde internete açarak webhook testlerini kolaylaştırmak için kullanıldı.</li>
+                <li><strong>Gemini AI:</strong> Kodlama, problem çözme, optimizasyon ve yeni fikirler üretme gibi geliştirme sürecinin çeşitli aşamalarında aktif olarak destek alındı.</li>
+                <li><strong>Github:</strong> Projenin versiyon kontrolünü sağlamak, kod geçmişini yönetmek ve projenin depolanması için kullanıldı.</li>
+            </ul>
+
+            <h2>Proje Süreci ve Geliştirici Notları</h2>
+            <p>Proje, çevik (agile) bir yaklaşımla geliştirilmiştir. İlk olarak temel işlevsellikler (adayları listeleme, filtreleme) oluşturulmuş, ardından kademeli olarak yeni özellikler (karşılaştırma, detay modalı, tema değiştirme) eklenmiştir. Bu süreçte, Gemini AI ile sürekli diyalog halinde çalışılarak en iyi pratikler ve etkili çözümler üzerine odaklanılmıştır.</p>
+
+            <h2>Öne Çıkan Özellikler ve İşlevler</h2>
+            <ul>
+                <li><strong>Dinamik Aday Listeleme:</strong> Adaylar, Google Sheets üzerinden anlık olarak çekilerek dinamik bir şekilde listelenir.</li>
+                <li><strong>Gelişmiş Filtreleme ve Sıralama:</strong> Adaylar, AI puanlarına (yüksek, orta, düşük) ve isme göre (A-Z) filtrelenip sıralanabilir.</li>
+                <li><strong>Çoklu Aday Karşılaştırma:</strong> En fazla 6 aday seçilerek, 3x2'lik bir grid üzerinde detaylı bir şekilde karşılaştırılabilir.</li>
+                <li><strong>Detaylı Aday Profili:</strong> Her adayın iletişim bilgileri, AI değerlendirmesi ve diğer detayları içeren profili, modal bir pencerede görüntülenebilir.</li>
+                <li><strong>Kullanıcı Dostu Arayüz:</strong> Koyu ve açık tema seçenekleri ile kullanıcıların göz yorgunluğunu azaltan modern bir arayüz sunulmuştur.</li>
+                <li><strong>Otomatik Veri Akışı ve Yenileme:</strong> "Yenile" butonu, n8n otomasyonunu tetikleyerek Google Form yanıtlarını işler, AI değerlendirmesi yapar ve sonuçları Google Sheets'e yazar. Ardından, bu güncel veriler arayüze yansıtılır.</li>
+            </ul>
+
+
+        </div>
     </main>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const themeToggleBtn = document.getElementById('theme-toggle');
+
+            function setTheme(isDark) {
+                if (isDark) {
+                    body.classList.add('dark-mode');
+                    themeToggleBtn.innerHTML = '☀️';
+                    themeToggleBtn.setAttribute('aria-label', 'Açık temaya geç');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.classList.remove('dark-mode');
+                    themeToggleBtn.innerHTML = '🌙';
+                    themeToggleBtn.setAttribute('aria-label', 'Koyu temaya geç');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            let initialThemeIsDark = false;
+            if (savedTheme) {
+                initialThemeIsDark = (savedTheme === 'dark');
+            } else {
+                initialThemeIsDark = prefersDark;
+            }
+            setTheme(initialThemeIsDark);
+
+            themeToggleBtn.addEventListener('click', () => {
+                const isCurrentlyDark = body.classList.contains('dark-mode');
+                setTheme(!isCurrentlyDark);
+            });
+        });
+    </script>
 </body>
 </html>

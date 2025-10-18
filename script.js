@@ -31,16 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const isCurrentlyDark = body.classList.contains('dark-mode');
         setTheme(!isCurrentlyDark);
     });
-    
-    
+
+
     // ----------------------------------------------------
     // GÜNCELLENMİŞ KODLAR BURADAN BAŞLIYOR
     // ----------------------------------------------------
 
-    // 5. YENİ: Google Apps Script API URL'miz
+    // 5. GÜNCELLENMİŞ: API URL'leri
     // ----------------------------------------------------
-    // DİKKAT: Önceki adımdaki Google Apps Script'i oluşturup URL'yi buraya yapıştırmalısın.
+    // Google Apps Script URL'si (Veri Okuma)
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLS97R0r9w49nu3F7qjrVcx299BI_e6q80RqjHn7T6solm4ZtwjTphTlkisNmRXrBd/exec';
+
+    // --> YENİ: n8n Webhook URL'si (ngrok + n8n yolu)
+    const N8N_TRIGGER_URL = 'https://postnodular-mui-incomprehensibly.ngrok-free.app/webhook/c4165332-bb5d-4663-b117-719a54996811'; // ngrok URL + Webhook Yolu
+
 
     // 6. GEREKLİ DİĞER HTML ELEMENTLERİNİ SEÇME
     // ----------------------------------------------------
@@ -49,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const compareButton = document.getElementById('compare-button');
     const sortBySelect = document.getElementById('sort-by');
     const filterByScoreSelect = document.getElementById('filter-by-score');
-    
+    const loaderContainer = document.getElementById('loader-container'); // Loader'ı seçtik
+
     // Detay Modalı elementleri
     const modalContainer = document.getElementById('modal-container');
     const modalCloseBtn = document.getElementById('modal-close');
@@ -59,50 +64,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalScore = document.getElementById('modal-score');
     const modalEmail = document.getElementById('modal-email');
     const modalPhone = document.getElementById('modal-phone');
-
-    // YENİ: Karşılaştırma Modalı elementleri
-    const compareModalContainer = document.getElementById('compare-modal-container');
-    const compareModalCloseBtn = document.getElementById('compare-modal-close');
-    const compareGridContent = document.getElementById('compare-grid-content');
-
-    // YENİ: AI Detayları için Modal elementleri
     const modalAiGuclu = document.querySelector('#modal-ai-guclu p');
     const modalAiRiskler = document.querySelector('#modal-ai-riskler p');
     const modalAiGerekce = document.querySelector('#modal-ai-gerekce p');
 
+
+    // Karşılaştırma Modalı elementleri
+    const compareModalContainer = document.getElementById('compare-modal-container');
+    const compareModalCloseBtn = document.getElementById('compare-modal-close');
+    const compareGridContent = document.getElementById('compare-grid-content');
+
     // Seçilen adayları ve tüm veriyi tutmak için
     let selectedCandidates = [];
-    let allCandidatesData = []; // Tüm aday verisini burada saklayacağız
-    const MAX_COMPARE_LIMIT = 10;
+    let allCandidatesData = [];
+    const MAX_COMPARE_LIMIT = 6;
 
     // 7. YARDIMCI FONKSİYONLAR
     // ----------------------------------------------------
-    
-    /**
-     * Adayın profil resmini belirler.
-     * Öncelik: Adayın kendi yüklediği resim.
-     * Değilse, cinsiyete göre varsayılan resim.
-     * @param {object} candidate - Aday nesnesi
-     * @returns {string} - Resim URL'si
-     */
+
     function getAvatar(candidate) {
-        // 1. Öncelik: Base64 formatındaki resim verisi var mı diye kontrol et.
         if (candidate.fotograf_base64 && candidate.fotograf_base64.startsWith('data:image')) {
             return candidate.fotograf_base64;
         }
-
-        // 2. Base64 resim yoksa, cinsiyete göre varsayılan avatarı kullan.
         if (candidate.cinsiyetiniz === 'Kadın' || candidate.cinsiyetiniz === 'Kız') {
             return 'icons/default-avatar-female.png';
         }
-        
-        // Varsayılan olarak veya 'Erkek' ise erkek avatarı
         return 'icons/default-avatar-male.png';
     }
 
-    /**
-     * AI puanına göre CSS sınıfını döndürür.
-     */
     function getScoreClass(score) {
         const numericScore = parseInt(score, 10);
         if (isNaN(numericScore)) return 'score-red';
@@ -114,14 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 8. ANA FONKSİYONLAR (Filtreleme, Sıralama, Kart Oluşturma)
     // ----------------------------------------------------
 
-    /**
-     * Mevcut filtrelere ve sıralama seçeneğine göre adayları işler ve görüntüler.
-     */
     function applyFiltersAndSort() {
-        // 1. Değerlendirilmiş adayları filtrele (puanı olanlar)
         let processedCandidates = allCandidatesData.filter(c => c.aIGenelSkor != null && String(c.aIGenelSkor).trim() !== '');
 
-        // 2. Puana göre filtrele
         const scoreFilter = filterByScoreSelect.value;
         if (scoreFilter !== 'all') {
             processedCandidates = processedCandidates.filter(c => {
@@ -133,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 3. Sırala
         const sortBy = sortBySelect.value;
         processedCandidates.sort((a, b) => {
             if (sortBy === 'score-desc') {
@@ -141,21 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (sortBy === 'score-asc') {
                 return parseInt(a.aIGenelSkor, 10) - parseInt(b.aIGenelSkor, 10);
             } else if (sortBy === 'name-asc') {
-                return a.adSoyad.localeCompare(b.adSoyad);
+                // localeCompare'i null/undefined kontrolü ile kullan
+                const nameA = a.adSoyad || '';
+                const nameB = b.adSoyad || '';
+                return nameA.localeCompare(nameB);
             }
             return 0;
         });
 
-        // 4. Sonuçları ekrana yansıt
         displayCandidates(processedCandidates);
     }
 
-    /**
-     * Veri dizisini alır ve HTML kartlarını oluşturup listeye ekler. (Sadece Görüntüleme)
-     * @param {Array<object>} candidates - Görüntülenecek aday nesnelerinden oluşan dizi
-     */
     function displayCandidates(candidates) {
-        candidateList.innerHTML = ''; // Listeyi temizle
+        candidateList.innerHTML = '';
 
         if (candidates.length === 0) {
              candidateList.innerHTML = '<p class="loading-message">Bu kriterlere uyan aday bulunamadı.</p>';
@@ -172,18 +153,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = card.querySelector('.candidate-select');
 
             image.src = getAvatar(candidate);
-            name.textContent = candidate.adSoyad;
-            interests.textContent = candidate.tecrubenOlanTeknolojiler;
-            scoreBadge.textContent = candidate.aIGenelSkor;
-            
-            const candidateId = candidate.timestamp; 
+            name.textContent = candidate.adSoyad || 'İsim Yok';
+            interests.textContent = candidate.tecrubenOlanTeknolojiler || 'Belirtilmemiş';
+            scoreBadge.textContent = candidate.aIGenelSkor || 'N/A';
+
+            const candidateId = candidate.timestamp;
             checkbox.value = candidateId;
             checkbox.checked = selectedCandidates.includes(candidateId);
 
             scoreBadge.classList.add(getScoreClass(candidate.aIGenelSkor));
 
             card.addEventListener('click', () => openModalById(candidateId));
-            
+
             checkbox.addEventListener('click', (event) => {
                 event.stopPropagation();
                 handleCandidateSelection(checkbox, candidateId);
@@ -192,96 +173,72 @@ document.addEventListener('DOMContentLoaded', () => {
             candidateList.appendChild(card);
         });
     }
-    
-    /**
-     * Gelen aday ID'sine göre modalı (popup) doldurur ve gösterir.
-     */
+
     function openModalById(candidateId) {
         const candidate = allCandidatesData.find(c => c.timestamp === candidateId);
         if (!candidate) return;
 
         modalImage.src = getAvatar(candidate);
-        modalName.textContent = candidate.adSoyad;
-        modalInterests.textContent = candidate.tecrubenOlanTeknolojiler;
-        modalScore.textContent = candidate.aIGenelSkor;
-        
+        modalName.textContent = candidate.adSoyad || 'İsim Yok';
+        modalInterests.textContent = candidate.tecrubenOlanTeknolojiler || 'Belirtilmemiş';
+        modalScore.textContent = candidate.aIGenelSkor || 'N/A';
+
         modalScore.className = 'score-badge';
         modalScore.classList.add(getScoreClass(candidate.aIGenelSkor));
-        
-        const email = candidate.email;
-        const phone = candidate.phone;
+
+        const email = candidate.email; // Apps Script'in bu alanı döndürdüğünden emin ol
+        const phone = candidate.phone; // Apps Script'in bu alanı döndürdüğünden emin ol
 
         if (email) {
             modalEmail.href = `mailto:${email}`;
-            modalEmail.textContent = email;
             modalEmail.style.display = 'block';
+             // --> GÜNCELLENDİ: Sadece e-postayı göster, link metni değil
+            modalEmail.innerHTML = `<i class="fas fa-envelope"></i> ${email}`;
         } else {
-            modalEmail.textContent = 'E-posta adresi bulunamadı.';
-            modalEmail.href = '#';
-            modalEmail.style.display = 'block';
+            modalEmail.style.display = 'none';
         }
 
         if (phone) {
             modalPhone.href = `tel:${phone}`;
-            modalPhone.textContent = phone;
             modalPhone.style.display = 'block';
+            // --> GÜNCELLENDİ: Sadece telefonu göster, link metni değil
+            modalPhone.innerHTML = `<i class="fas fa-phone"></i> ${phone}`;
         } else {
-            modalPhone.textContent = 'Telefon numarası bulunamadı.';
-            modalPhone.href = '#';
-            modalPhone.style.display = 'block';
+            modalPhone.style.display = 'none';
         }
 
-        // YENİ: AI Detaylarını doldur
+        // AI Detaylarını doldur (Apps Script'ten gelen temizlenmiş adlarla)
         modalAiGuclu.textContent = candidate.aIGucluYanlar || 'Bilgi yok.';
         modalAiRiskler.textContent = candidate.aIRiskler || 'Bilgi yok.';
         modalAiGerekce.textContent = candidate.aIKisaGerekce || 'Bilgi yok.';
-        
-        // Modalı göster
+
         modalContainer.classList.add('show');
     }
 
-    /**
-     * Detay modalını gizler.
-     */
     function closeModal() {
         modalContainer.classList.remove('show');
     }
 
-    /**
-     * YENİ: Karşılaştırma modalını açar.
-     */
     function openCompareModal() {
         compareModalContainer.classList.add('show');
     }
 
-    /**
-     * YENİ: Karşılaştırma modalını gizler.
-     */
     function closeCompareModal() {
         compareModalContainer.classList.remove('show');
     }
 
-    // Modal'ı kapatma olaylarını ekle
     modalCloseBtn.addEventListener('click', closeModal);
     modalContainer.addEventListener('click', (event) => {
-        if (event.target === modalContainer) {
-            closeModal();
-        }
+        if (event.target === modalContainer) closeModal();
     });
-    // YENİ: Karşılaştırma modalı kapatma olayları
     compareModalCloseBtn.addEventListener('click', closeCompareModal);
     compareModalContainer.addEventListener('click', (event) => {
-        if (event.target === compareModalContainer) {
-            closeCompareModal();
-        }
+        if (event.target === compareModalContainer) closeCompareModal();
     });
 
     // 9. OLAY DİNLEYİCİLERİ VE SAYFAYI BAŞLATMA
     // ----------------------------------------------------
-    
-    /**
-     * Checkbox tıklandığında seçilen aday listesini günceller.
-     */
+
     function handleCandidateSelection(checkbox, candidateId) {
         if (checkbox.checked) {
             if (selectedCandidates.length < MAX_COMPARE_LIMIT) {
@@ -296,32 +253,21 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCompareButton();
     }
 
-    /**
-     * Karşılaştır butonunun metnini ve durumunu günceller.
-     */
     function updateCompareButton() {
         const count = selectedCandidates.length;
-        
-        if (count > 0) {
-            compareButton.textContent = `Seçilenleri Karşılaştır (${count})`;
-            compareButton.disabled = false;
-        } else {
-            compareButton.textContent = 'Seçilenleri Karşılaştır (0)';
-            compareButton.disabled = true;
-        }
+        compareButton.textContent = `Karşılaştır (${count}/${MAX_COMPARE_LIMIT})`;
+        compareButton.disabled = count === 0;
     }
-    
-    // Karşılaştır butonuna tıklama olayı
+
     compareButton.addEventListener('click', () => {
-        handleCompareRequest();
+        handleCompareRequest(); // Karşılaştırma modalını açan fonksiyon
     });
 
-    // YENİ: Filtreleme ve sıralama menülerine olay dinleyicileri ekle
     sortBySelect.addEventListener('change', applyFiltersAndSort);
     filterByScoreSelect.addEventListener('change', applyFiltersAndSort);
 
     /**
-     * Seçilen adayları alıp karşılaştırma modalını modern sütun formatında doldurur ve açar.
+     * Seçilen adayları alıp karşılaştırma modalını doldurur ve açar.
      */
     function handleCompareRequest() {
         if (selectedCandidates.length === 0) return;
@@ -337,20 +283,23 @@ document.addEventListener('DOMContentLoaded', () => {
             column.className = 'compare-column';
 
             const scoreClass = getScoreClass(candidate.aIGenelSkor);
+            // --> GÜNCELLENDİ: Apps Script'ten gelen temizlenmiş adları kullan
             const technologies = candidate.tecrubenOlanTeknolojiler || 'N/A';
             const strengths = candidate.aIGucluYanlar || 'N/A';
             const risks = candidate.aIRiskler || 'N/A';
             const recommendation = candidate.aIoneri || 'N/A';
+            const score = candidate.aIGenelSkor || 'N/A';
+            const name = candidate.adSoyad || 'İsim Yok';
 
             column.innerHTML = `
-                <img src="${getAvatar(candidate)}" alt="${candidate.adSoyad}" class="compare-avatar">
-                <h3>${candidate.adSoyad}</h3>
-                
+                <img src="${getAvatar(candidate)}" alt="${name}" class="compare-avatar">
+                <h3>${name}</h3>
+
                 <div class="compare-attribute">
                     <label>AI Puanı</label>
-                    <span class="score-badge ${scoreClass}">${candidate.aIGenelSkor}</span>
+                    <span class="score-badge ${scoreClass}">${score}</span>
                 </div>
-                
+
                 <div class="compare-attribute">
                     <label>AI Önerisi</label>
                     <p>${recommendation}</p>
@@ -381,63 +330,92 @@ document.addEventListener('DOMContentLoaded', () => {
      * Google Apps Script API'sinden aday verilerini çeker ve ekranı doldurur.
      */
     async function fetchCandidates() {
-        const loaderContainer = document.getElementById('loader-container');
-        loaderContainer.style.display = 'flex';
+        loaderContainer.style.display = 'flex'; // Loader'ı göster
 
         try {
+            console.log('Veri çekiliyor:', GOOGLE_SCRIPT_URL);
             const response = await fetch(GOOGLE_SCRIPT_URL);
+            console.log('Yanıt alındı:', response.status);
+
             if (!response.ok) {
                 throw new Error(`HTTP hatası! Durum: ${response.status}`);
             }
             const data = await response.json();
-            
+            console.log('Veri JSON olarak ayrıştırıldı.');
+
             if (data.error) {
                  throw new Error(`API Hatası: ${data.error}`);
             }
-            
-            allCandidatesData = data; 
-            applyFiltersAndSort(); // <-- DEĞİŞİKLİK: Artık bu fonksiyonu çağırıyoruz
+
+            allCandidatesData = data;
+            applyFiltersAndSort(); // Filtrele, sırala ve görüntüle
 
         } catch (error) {
             console.error('Veri çekme hatası:', error);
             candidateList.innerHTML = '<p class="error-message">Adaylar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
         } finally {
-            loaderContainer.style.display = 'none';
+            loaderContainer.style.display = 'none'; // Loader'ı gizle
         }
     }
 
-    async function init() {
-        await fetchCandidates();
+   async function init() {
+        await fetchCandidates(); // İlk yükleme
+        updateCompareButton(); // Butonun başlangıç durumunu ayarla
 
         const refreshButton = document.getElementById('refresh-button');
-
-        refreshButton.addEventListener('click', () => {
-            const loaderContainer = document.getElementById('loader-container');
-            loaderContainer.style.display = 'flex';
-
-            const n8nWebhookUrl = 'https://short-fly-68.hooks.n8n.cloud/webhook-test/86789385-940b-46d8-bceb-7a1ab0f4caa0';
-
-            fetch(n8nWebhookUrl, { method: 'POST' })
-                .then(response => {
-                    if (response.ok) {
-                        // Wait a bit for n8n to process and then reload the candidates
-                        setTimeout(() => {
-                            fetchCandidates();
-                        }, 5000); // 5 seconds delay
-                    } else {
-                        throw new Error('n8n workflow could not be triggered.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error triggering n8n workflow:', error);
-                    candidateList.innerHTML = '<p class="error-message">CVler yenilenemedi. Lütfen daha sonra tekrar deneyin.</p>';
-                    loaderContainer.style.display = 'none';
-                });
-        });
-
         const googleSheetLink = document.getElementById('google-sheet-link');
         const googleFormLink = document.getElementById('google-form-link');
+        const logoutButton = document.getElementById('logout-button');
 
+        // --> GÜNCELLENDİ: Yenile Butonu Olay Dinleyicisi (ngrok ile)
+        refreshButton.addEventListener('click', async () => {
+            // URL'nin geçerli olup olmadığını basitçe kontrol et
+             if (!N8N_TRIGGER_URL || !N8N_TRIGGER_URL.startsWith('https://')) {
+                 alert('Lütfen script.js dosyasındaki N8N_TRIGGER_URL değişkenini geçerli ngrok URL\'niz ile güncelleyin.');
+                 return;
+            }
+
+            loaderContainer.style.display = 'flex';
+            refreshButton.disabled = true;
+            refreshButton.textContent = 'Tetikleniyor...';
+
+            try {
+                // n8n webhook'unu tetikle (POST isteği)
+                console.log('n8n Webhook URL\'sine POST isteği gönderiliyor:', N8N_TRIGGER_URL);
+                const triggerResponse = await fetch(N8N_TRIGGER_URL, { method: 'POST' });
+                console.log('n8n yanıtı alındı:', triggerResponse.status);
+
+
+                if (!triggerResponse.ok) {
+                    // n8n yanıtı başarısızsa (örn: 404, 500) hata fırlat
+                    throw new Error(`n8n webhook tetiklenemedi. Durum: ${triggerResponse.status}`);
+                }
+
+                // n8n'in işlemi bitirmesi için bekleme süresi (milisaniye)
+                const waitTime = 15000; // 15 saniye bekle (Workflow süresine göre ayarla)
+                console.log(`n8n workflow başarıyla tetiklendi. Veri yenileme için ${waitTime/1000} saniye bekleniyor...`);
+                refreshButton.textContent = 'İşleniyor...';
+
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+
+                console.log("Veriler yeniden çekiliyor...");
+                await fetchCandidates(); // Veri okuma API'sinden güncel veriyi çek
+                console.log("Veriler başarıyla yenilendi.");
+
+
+            } catch (error) {
+                console.error('n8n tetikleme veya veri yenileme hatası:', error);
+                 alert(`Aday verileri yenilenirken bir hata oluştu: ${error.message}. Lütfen konsolu kontrol edin.`);
+
+            } finally {
+                // Her durumda loader'ı gizle ve butonu tekrar aktif et
+                loaderContainer.style.display = 'none';
+                refreshButton.disabled = false;
+                refreshButton.textContent = 'Yenile';
+            }
+        });
+
+        // Diğer Linkler ve Butonlar
         googleSheetLink.addEventListener('click', () => {
             window.open('https://docs.google.com/spreadsheets/d/1pIlRUZ3ZI3PQgGNAks97l5pbGR1hXQPljpApnK1BW0s/edit?gid=1478236436#gid=1478236436', '_blank');
         });
@@ -446,13 +424,12 @@ document.addEventListener('DOMContentLoaded', () => {
             window.open('https://docs.google.com/forms/d/e/1FAIpQLScdpPrUJ_Le-P25aIwUHAPVFqKX3T-jVAyviThaj_zuw48tjQ/viewform', '_blank');
         });
 
-        const logoutButton = document.getElementById('logout-button');
         logoutButton.addEventListener('click', () => {
             sessionStorage.removeItem('isLoggedIn');
             window.location.href = 'index.html';
         });
     }
 
-    init();
+    init(); // Sayfayı başlat
 
-});
+}); // DOMContentLoaded sonu
