@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLS97R0r9w49nu3F7qjrVcx299BI_e6q80RqjHn7T6solm4ZtwjTphTlkisNmRXrBd/exec';
 
     // --> YENİ: n8n Webhook URL'si (ngrok + n8n yolu)
-    const N8N_TRIGGER_URL = 'https://postnodular-mui-incomprehensibly.ngrok-free.app/webhook/c4165332-bb5d-4663-b117-719a54996811'; // ngrok URL + Webhook Yolu
+    const N8N_TRIGGER_URL = 'https://torie-postarytenoid-preeducationally.ngrok-free.dev/webhook/c4165332-bb5d-4663-b117-719a54996811'; // ngrok URL + Webhook Yolu
 
 
     // 6. GEREKLİ DİĞER HTML ELEMENTLERİNİ SEÇME
