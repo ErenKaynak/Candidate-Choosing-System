@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aday Değerlendirme Paneli</title>
-    
+
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#ffffff"/> <link rel="stylesheet" href="style.css">
     <script>
-        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'index.html';
-        }
+        // Basit oturum kontrolü
+        // if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+        //     window.location.href = 'index.html';
+        // }
     </script>
 </head>
 <body>
@@ -25,15 +26,15 @@
                     <a href="#" id="google-form-link">Google Form</a>
                 </div>
             </div>
-            <a href="developer.html" style="color: var(--text-color); text-decoration: none; font-size: 1.2rem;">Hakkında</a>
+            <a href="developer.html" class="header-link">Hakkında</a>
         </div>
         <div class="header-center">
-            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
+            <img src="icons/kovan-logo.svg" alt="Kovan Logo" class="header-logo">
             <h1>Aday Değerlendirme Paneli</h1>
         </div>
         <div class="header-right">
             <button id="theme-toggle" aria-label="Temayı değiştir">🌙</button>
-            <button id="logout-button" style="background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer;" aria-label="Çıkış Yap"><i class="fas fa-power-off"></i></button>
+            <button id="logout-button" class="icon-button" aria-label="Çıkış Yap"><i class="fas fa-power-off"></i></button>
         </div>
     </header>
 
@@ -52,20 +53,28 @@
                     <option value="name-asc">İsme Göre (A-Z)</option>
                 </select>
             </div>
-            <button id="refresh-button" class="control-button">Yenile</button>
-            <button id="compare-button" disabled>Karşılaştır (0/6)</button>
+            <div class="action-buttons">
+                <button id="refresh-button" class="control-button">Yenile</button>
+                <button id="compare-button" class="control-button" disabled>Karşılaştır (0/6)</button>
+                <div class="selection-actions" id="selection-actions-menu" style="display: none;">
+                    <button class="icon-button" id="selection-actions-button" aria-label="Seçim İşlemleri"><i class="fas fa-ellipsis-v"></i></button>
+                    <div class="selection-actions-dropdown">
+                        <button id="delete-selected-button"><i class="fas fa-trash-alt"></i> Seçilenleri Sil</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-                <div id="loader-container" class="loader-container">
-                    <div class="loader"></div>
-                </div>
-                <div id="candidate-list" class="candidate-grid">
-                </div>    </main>
+        <div id="loader-container" class="loader-container" style="display: none;"> <div class="loader"></div>
+        </div>
+        <div id="candidate-list" class="candidate-grid">
+            </div>
+    </main>
 
     <template id="candidate-card-template">
         <div class="candidate-card">
             <input type="checkbox" class="candidate-select" aria-label="Adayı seç">
-            
+
             <img src="icons/default-avatar.png" alt="Profil Resmi" class="card-image">
             <h2 class="card-name">Aday İsmi</h2>
             <p class="card-interests">İlgi Alanları</p>
@@ -108,19 +117,16 @@
         </div>
     </div>
 
-    <!-- YENİ: Karşılaştırma Modalı -->
     <div id="compare-modal-container" class="modal-container">
         <div class="modal-content compare-modal-content">
             <button id="compare-modal-close" class="modal-close">&times;</button>
             <h2>Aday Karşılaştırma</h2>
             <div id="compare-grid-content" class="compare-grid">
-                <!-- Karşılaştırılacak adaylar buraya dinamik olarak eklenecek -->
-            </div>
+                </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js" defer></script>
-    
     <script src="script.js" defer></script>
 </body>
 </html>

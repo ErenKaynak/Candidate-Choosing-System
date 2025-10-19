@@ -10,6 +10,7 @@
     --score-red: #e63946;
     --score-yellow: #fca311;
     --score-green: #2a9d8f;
+    --delete-color: #dc3545; /* Silme butonu için renk */
 }
 
 /* Koyu Tema Değişkenleri */
@@ -20,15 +21,11 @@ body.dark-mode {
     --text-color-light: #aaaaaa;
     --border-color: #444444;
     --shadow-color: rgba(0, 0, 0, 0.2);
+    --delete-color: #f85149;
 }
 
 /* 2. Temel Stiller ve Sayfa Yapısı */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg-color);
@@ -36,496 +33,184 @@ body {
     transition: background-color 0.3s, color 0.3s;
     line-height: 1.6;
 }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent-color); text-decoration: none; }
 
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-}
-
-a {
-    color: var(--accent-color);
-    text-decoration: none;
-}
-
+/* Header Stilleri */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0.8rem 1.5rem; /* Biraz daha kompakt */
     background-color: var(--card-bg-color);
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 5px var(--shadow-color);
-    position: sticky; /* Üstte sabit kalır */
-    top: 0;
-    z-index: 100;
+    position: sticky; top: 0; z-index: 100;
 }
+.header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
+.header-center { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+.header-logo { height: 35px; margin-right: 10px; }
+header h1 { font-size: 1.4rem; } /* Biraz daha küçük */
+.header-link { color: var(--text-color); text-decoration: none; font-size: 1rem; }
+.icon-button { background: none; border: none; font-size: 1.4rem; color: var(--text-color); cursor: pointer; padding: 0.5rem; }
+#theme-toggle { font-size: 1.4rem; background: transparent; border:none}
 
-.header-left, .header-right {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
+/* Main Content */
+main { padding: 1.5rem; max-width: 1600px; margin: 0 auto; }
 
-.header-center {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-
-#theme-toggle {
-    font-size: 1.5rem;
-    background: none;
-    border: none;
-    color: var(--text-color);
-    cursor: pointer;
-}
-
-main {
-    padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
+/* Kontrol Bölümü */
 .controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Ekran küçülünce alt satıra geçsin */
+    flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 2rem;
 }
-
-#compare-button {
-    padding: 0.75rem 1.5rem;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#compare-button:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
-}
-
-.filter-sort-controls {
-    display: flex;
-    gap: 1rem;
-}
-
-.controls select {
-    padding: 0.75rem;
+.filter-sort-controls { display: flex; gap: 1rem; flex-wrap: wrap; }
+.controls select, .control-button {
+    padding: 0.6rem 1.2rem; /* Biraz daha küçük */
     background-color: var(--card-bg-color);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
     cursor: pointer;
+}
+.control-button {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.control-button:disabled { background-color: #aaa; cursor: not-allowed; }
+.control-button:hover:not(:disabled) { background-color: #0056b3; }
+
+/* YENİ: Aksiyon Butonları Grubu */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Butonlar arası boşluk */
+}
+
+/* YENİ: Seçim Aksiyonları Menüsü */
+.selection-actions {
+    position: relative; /* Dropdown'ı konumlandırmak için */
+}
+#selection-actions-button {
+    /* icon-button stillerini miras alır */
+    padding: 0.6rem; /* Kontrol butonlarıyla aynı yükseklik için */
+}
+.selection-actions-dropdown {
+    display: none; /* Başlangıçta gizli */
+    position: absolute;
+    right: 0;
+    top: 100%; /* Butonun hemen altında */
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    z-index: 101;
+    min-width: 180px; /* Minimum genişlik */
+    padding: 0.5rem 0;
+}
+.selection-actions-dropdown.show {
+    display: block; /* Göster */
+}
+.selection-actions-dropdown button {
+    display: flex; /* İkon ve metni yan yana getir */
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    cursor: pointer;
+}
+.selection-actions-dropdown button i {
+    margin-right: 0.75rem;
+    width: 16px; /* İkon hizalaması için */
+}
+.selection-actions-dropdown button:hover {
+    background-color: var(--bg-color);
+}
+#delete-selected-button {
+    color: var(--delete-color); /* Silme rengi */
 }
 
 /* 3. Aday Kartı Grid (Responsive) */
-.candidate-grid {
-    display: grid;
-    /* Mobil: 1 sütun. 
-      Tablet ve Masaüstü: Ekran sığdıkça 280px'lik kartlar ekler.
-    */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    position: relative; /* Yükleme ikonunu ortalamak için */
-}
-
-.candidate-card {
-    position: relative; /* Checkbox'ı konumlandırmak için */
-    background-color: var(--card-bg-color);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 10px var(--shadow-color);
-    overflow: hidden;
-    text-align: center;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.candidate-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px var(--shadow-color);
-}
-
-.candidate-select {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    /* Kart tıklamasını (modal açma) engellememesi için */
-    z-index: 10; 
-}
-
-.card-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 0 auto 1rem auto;
-    border: 3px solid var(--border-color);
-    object-fit: cover; /* Resimlerin orantılı görünmesi için */
-}
-
-.card-name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.card-interests {
-    font-size: 0.9rem;
-    color: var(--text-color-light);
-    margin-bottom: 1rem;
-    /* Kartların boyunun eşit kalması için min yükseklik */
-    min-height: 2.7em; 
-}
-
-.card-score {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-    font-size: 0.9rem;
-    color: var(--text-color-light);
-}
-
-.score-badge {
-    font-size: 1rem;
-    font-weight: bold;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    color: white;
-}
-
-/* İSTEK 2: Koşullu Skor Renkleri */
+.candidate-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; position: relative; }
+.candidate-card { position: relative; background-color: var(--card-bg-color); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px var(--shadow-color); overflow: hidden; text-align: center; padding: 1.5rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.candidate-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px var(--shadow-color); }
+.candidate-select { position: absolute; top: 1rem; right: 1rem; width: 20px; height: 20px; cursor: pointer; z-index: 10; }
+.card-image { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 1rem auto; border: 3px solid var(--border-color); object-fit: cover; }
+.card-name { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem; }
+.card-interests { font-size: 0.9rem; color: var(--text-color-light); margin-bottom: 1rem; min-height: 2.7em; }
+.card-score { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-color-light); }
+.score-badge { font-size: 1rem; font-weight: bold; padding: 0.25rem 0.75rem; border-radius: 20px; color: white; }
 .score-red { background-color: var(--score-red); }
 .score-yellow { background-color: var(--score-yellow); }
 .score-green { background-color: var(--score-green); }
 
-/* 4. Modal (Detay Sayfası) */
-.modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    /* Gizli state */
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-}
-
-.modal-container.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal-content {
-    position: relative;
-    background-color: var(--card-bg-color);
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    text-align: center;
-    /* İçeriğin girmesi için animasyon */
-    transform: translateY(-20px);
-    transition: transform 0.3s;
-}
-
-.modal-container.show .modal-content {
-    transform: translateY(0);
-}
-
-.modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
-    background: none;
-    border: none;
-    color: var(--text-color-light);
-    cursor: pointer;
-}
-
-.modal-image {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin: 0 auto 1rem auto;
-    border: 3px solid var(--border-color);
-    object-fit: cover;
-}
-
+/* 4. Modal (Detay ve Karşılaştırma) */
+.modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+.modal-container.show { opacity: 1; visibility: visible; }
+.modal-content { position: relative; background-color: var(--card-bg-color); padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; text-align: center; transform: translateY(-20px); transition: transform 0.3s; max-height: 90vh; overflow-y: auto; /* Uzun içerik için scroll */ }
+.modal-container.show .modal-content { transform: translateY(0); }
+.modal-close { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; background: none; border: none; color: var(--text-color-light); cursor: pointer; }
+.modal-image { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 1rem auto; border: 3px solid var(--border-color); object-fit: cover; }
 #modal-name { margin-bottom: 0.5rem; }
 #modal-interests { color: var(--text-color-light); margin-bottom: 1rem; }
 .modal-score-container { margin-bottom: 1.5rem; font-size: 1.1rem; }
-
-.modal-contact {
-    text-align: left;
-    border-top: 1px solid var(--border-color);
-    padding-top: 1.5rem;
-}
-
+.modal-contact { text-align: left; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
 .modal-contact h3 { margin-bottom: 1rem; }
-.modal-contact a {
-    display: block;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-.modal-contact a i {
-    margin-right: 10px;
-    width: 20px;
-    text-align: center;
-}
+.modal-contact a { display: block; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 500; }
+.modal-contact a i { margin-right: 10px; width: 20px; text-align: center; }
+.contact-button { background-color: var(--accent-color); color: white !important; padding: 10px 15px; border-radius: 8px; text-align: center; transition: background-color 0.2s; display: block; margin-bottom: 10px !important; }
+.contact-button:hover { background-color: #0056b3; }
+.modal-ai-details { text-align: left; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
+.modal-ai-details h3 { text-align: center; margin-bottom: 1rem; }
+.modal-ai-details h4 { font-size: 1rem; font-weight: 600; color: var(--text-color); margin-top: 1rem; margin-bottom: 0.25rem; }
+.modal-ai-details p { font-size: 0.9rem; color: var(--text-color-light); }
 
-.contact-button {
-    background-color: var(--accent-color);
-    color: white !important;
-    padding: 10px 15px;
-    border-radius: 8px;
-    text-align: center;
-    transition: background-color 0.2s;
-    display: block; /* Butonların tam genişlikte olması için */
-    margin-bottom: 10px !important; /* Butonlar arasına boşluk ekle */
-}
+/* Karşılaştırma Modalı Stilleri */
+.compare-modal-content { max-width: 1200px; width: 90%; }
+#compare-grid-content { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; padding-bottom: 1rem; }
+.compare-column { flex: 1 1 calc(33.333% - 1rem); min-width: 260px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem; text-align: center; }
+.compare-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem; border: 2px solid var(--border-color); }
+.compare-column h3 { font-size: 1.2rem; margin-bottom: 1rem; }
+.compare-attribute { text-align: left; margin-bottom: 1rem; }
+.compare-attribute label { font-size: 0.7rem; font-weight: 600; color: var(--text-color-light); display: block; margin-bottom: 0.25rem; }
+.compare-attribute p, .compare-attribute .score-badge { font-size: 0.9rem; }
 
-.contact-button:hover {
-    background-color: #0056b3; /* Koyu mavi */
-}
+/* Yüklenme Animasyonu */
+.loader-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+.loader { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.modal-ai-details {
-    text-align: left;
-    margin-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    padding-top: 1.5rem;
-}
+/* Dropdown (Header Linkler) */
+.dropdown { position: relative; display: inline-block; margin-left: 0.5rem; } /* Soldaki linke daha yakın */
+.dropdown-button i { margin-left: 5px; font-size: 0.8em; }
+.dropdown-button { background-color: transparent; color: var(--text-color); padding: 0.5rem; /* Daha küçük */ font-size: 1rem; border: none; cursor: pointer; }
+.dropdown-content { display: none; position: absolute; background-color: var(--card-bg-color); min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 101; border-radius: 8px; margin-top: 5px; }
+.dropdown-content a { color: var(--text-color); padding: 10px 15px; text-decoration: none; display: block; font-size: 0.95rem; }
+.dropdown-content a:hover { background-color: var(--bg-color); }
+.dropdown:hover .dropdown-content { display: block; }
 
-.modal-ai-details h3 {
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-.modal-ai-details h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-color);
-    margin-top: 1rem;
-    margin-bottom: 0.25rem;
-}
-
-.modal-ai-details p {
-    font-size: 0.9rem;
-    color: var(--text-color-light);
-}
-
-/* YENİ: Karşılaştırma Modalı Stilleri */
-.compare-modal-content {
-    max-width: 1200px;
-    width: 90%; 
-}
-
-/* compare-grid-content id'li div'i flex container yapıyoruz */
-#compare-grid-content {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    padding-bottom: 1rem; /* Kaydırma çubuğu için boşluk */
-}
-
-.compare-column {
-    flex: 1 1 calc(33.333% - 1rem);
-    min-width: 260px;
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 1rem;
-    text-align: center;
-}
-
-.compare-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 1rem; /* Resmi yatayda ortala */
-    border: 2px solid var(--border-color);
-}
-
-.compare-column h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-}
-
-.compare-attribute {
-    text-align: left;
-    margin-bottom: 1rem;
-}
-
-.compare-attribute label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-color-light);
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.compare-attribute p,
-.compare-attribute .score-badge {
-    font-size: 0.9rem;
-}
-
-
-/* YENİ: Yüklenme Animasyonu (Spinner) */
-.loader-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.loader {
-    width: 50px;
-    height: 50px;
-    border: 5px solid var(--border-color);
-    border-top-color: var(--accent-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* Dropdown Button */
-.dropdown {
-    position: relative;
-    display: inline-block;
-    margin-left: 1.5rem;
-}
-
-.dropdown-button i {
-    margin-left: 5px;
-    font-size: 0.8em;
-}
-
-.dropdown-button {
-    background-color: transparent;
-    color: var(--text-color);
-    padding: 0.75rem;
-    font-size: 1.2rem;
-    border: none;
-    cursor: pointer;
-}
-
-/* Dropdown Content (Hidden by Default) */
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: var(--card-bg-color);
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 8px;
-}
-
-/* Links inside the dropdown */
-.dropdown-content a {
-    color: var(--text-color);
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-}
-
-/* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: var(--bg-color);}
-
-/* Show the dropdown menu on hover */
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-#refresh-button {
-    padding: 0.75rem 1.5rem;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#refresh-button:hover {
-    background-color: #0056b3;
-}
-
-/* 5. Genel Responsive Ayarlar */
+/* Genel Responsive Ayarlar */
 @media (max-width: 768px) {
-    header {
-        padding: 1rem;
-    }
-    main {
-        padding: 1rem;
-    }
-    .controls {
-        text-align: center;
-    }
+    header { padding: 0.8rem 1rem; flex-wrap: wrap; justify-content: center;} /* Mobilde sığmazsa alt satıra */
+    .header-center { order: -1; width: 100%; margin-bottom: 0.5rem; } /* Logoyu ve başlığı üste al */
+    .header-left, .header-right { gap: 0.5rem; }
+    main { padding: 1rem; }
+    .controls { flex-direction: column; align-items: stretch; } /* Kontrolleri alt alta */
+    .filter-sort-controls { justify-content: center; }
+    .action-buttons { justify-content: center; }
+    .compare-modal-content { max-width: 95%; }
+    .compare-column { flex-basis: calc(50% - 0.5rem); min-width: unset;} /* Mobilde 2 sütun */
 }
-
-.about-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: var(--card-bg-color);
-    border-radius: 12px;
-    box-shadow: 0 4px 10px var(--shadow-color);
-}
-
-.about-container h2 {
-    margin-bottom: 1rem;
-}
-
-.about-container p {
-    margin-bottom: 1rem;
-}
-
-.about-container ul {
-    list-style-position: inside;
-    padding-left: 1rem;
-    margin-bottom: 1rem;
-}
-
-.about-container li {
-    margin-bottom: 0.5rem;
+@media (max-width: 480px) {
+    .compare-column { flex-basis: 100%; } /* Çok küçük ekranlarda tek sütun */
 }
