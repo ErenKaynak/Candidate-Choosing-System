@@ -1,6 +1,7 @@
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 
 # Candidate Choosing System 🎯
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A modern, production-ready candidate evaluation and comparison platform developed for Kovan Studio. This system streamlines the internship candidate assessment process with AI-powered evaluations and intuitive user interface.
 
