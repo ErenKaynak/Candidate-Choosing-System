@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proje Hakkında</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script>
         if (sessionStorage.getItem('isLoggedIn') !== 'true') {
             window.location.href = 'index.html';
@@ -15,48 +16,76 @@
 
     <header>
         <div class="header-left">
-            <a href="dashboard.html" style="background: none; border: none; font-size: 1.2rem; color: var(--text-color); cursor: pointer; text-decoration: none;">Ana Sayfa</a>
+            <a href="dashboard.html" class="header-link"><i class="fas fa-arrow-left"></i> Ana Sayfa</a>
         </div>
         <div class="header-center">
-            <img src="icons/kovan-logo.svg" alt="Kovan Logo" style="height: 40px; margin-right: 15px;">
+            <img src="icons/kovan-logo.svg" alt="Kovan Logo" class="header-logo">
             <h1>Proje Hakkında</h1>
         </div>
         <div class="header-right">
-            <button id="theme-toggle" aria-label="Temayı değiştir" style="background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer;">🌙</button>
+            <button id="theme-toggle" aria-label="Temayı değiştir">🌙</button>
         </div>
     </header>
 
-    <main>
+    <main class="about-page-main">
         <div class="about-container">
-            <h2>Proje ve Geliştirici Hakkında</h2>
-            <p>Bu proje, bir aday değerlendirme sürecini basitleştirmek ve otomatize etmek amacıyla <b>Eren Kaynak</b> tarafından yaklaşık 12 saatte geliştirilmiştir.</p>
 
-            <h2>Teknoloji ve Araçlar</h2>
-            <p>Proje, modern web teknolojileri ve otomasyon araçları kullanılarak Producton-ready olarak tasarlanmıştır</p>
-            <ul>
-                <li><strong>HTML:</strong> Web sayfasının temel iskeletini ve içeriğini oluşturmak için kullanıldı.</li>
-                <li><strong>CSS:</strong> Uygulamanın görsel tasarımını, renk paletini, tipografisini ve genel yerleşimini şekillendirmek için kullanıldı.</li>
-                <li><strong>JavaScript:</strong> Kullanıcı etkileşimlerini yönetmek, dinamik içerik oluşturmak ve API entegrasyonlarını sağlamak için kullanıldı.</li>
-                <li><strong>Google Apps Script:</strong> Google Sheets ve Google Forms ile sunucusuz bir backend oluşturmak, verileri okumak, işlemek ve otomasyonları tetiklemek için kullanıldı.</li>
-                <li><strong>n8n(self-host):</strong> Farklı servisler arasında karmaşık veri akışlarını ve otomasyonları (workflow) yönetmek için kullanıldı.</li>
-                <li><strong>ngrok(self-host):</strong> Geliştirme aşamasında lokal sunucuyu (n8n) güvenli bir şekilde internete açarak webhook testlerini kolaylaştırmak için kullanıldı.</li>
-                <li><strong>Gemini AI:</strong> Kodlama, problem çözme, optimizasyon ve yeni fikirler üretme gibi geliştirme sürecinin çeşitli aşamalarında aktif olarak destek alındı.</li>
-                <li><strong>Github:</strong> Projenin versiyon kontrolünü sağlamak, kod geçmişini yönetmek ve projenin depolanması için kullanıldı.</li>
-            </ul>
+            <!-- Geliştirici Kartı -->
+            <div class="developer-card">
+                <div class="developer-avatar">
+                    <img src="https://avatars.githubusercontent.com/u/13038783?v=4" alt="Eren Kaynak">
+                </div>
+                <div class="developer-info">
+                    <h2>Eren Kaynak</h2>
+                    <p class="developer-title">Full Stack Developer</p>
+                    <div class="developer-social">
+                        <a href="https://github.com/erenkaynak" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/eren-kaynak/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://twitter.com/erenkaynak" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
 
-            <h2>Proje Süreci ve Geliştirici Notları</h2>
-            <p>Proje, çevik (agile) bir yaklaşımla geliştirilmiştir. İlk olarak temel işlevsellikler (adayları listeleme, filtreleme) oluşturulmuş, ardından kademeli olarak yeni özellikler (karşılaştırma, detay modalı, tema değiştirme) eklenmiştir. Bu süreçte, Gemini AI ile sürekli diyalog halinde çalışılarak en iyi pratikler ve etkili çözümler üzerine odaklanılmıştır.</p>
+            <!-- Proje Hakkında -->
+            <div class="about-section">
+                <h3>Proje Hakkında</h3>
+                <p>Bu proje, bir aday değerlendirme sürecini basitleştirmek ve otomatize etmek amacıyla yaklaşık 12 saatte geliştirilmiş bir prototiptir. Proje, modern web teknolojileri ve otomasyon araçları kullanılarak "production-ready" bir yaklaşımla tasarlanmıştır.</p>
+            </div>
 
-            <h2>Öne Çıkan Özellikler ve İşlevler</h2>
-            <ul>
-                <li><strong>Dinamik Aday Listeleme:</strong> Adaylar, Google Sheets üzerinden anlık olarak çekilerek dinamik bir şekilde listelenir.</li>
-                <li><strong>Gelişmiş Filtreleme ve Sıralama:</strong> Adaylar, AI puanlarına (yüksek, orta, düşük) ve isme göre (A-Z) filtrelenip sıralanabilir.</li>
-                <li><strong>Çoklu Aday Karşılaştırma:</strong> En fazla 6 aday seçilerek, 3x2'lik bir grid üzerinde detaylı bir şekilde karşılaştırılabilir.</li>
-                <li><strong>Detaylı Aday Profili:</strong> Her adayın iletişim bilgileri, AI değerlendirmesi ve diğer detayları içeren profili, modal bir pencerede görüntülenebilir.</li>
-                <li><strong>Kullanıcı Dostu Arayüz:</strong> Koyu ve açık tema seçenekleri ile kullanıcıların göz yorgunluğunu azaltan modern bir arayüz sunulmuştur.</li>
-                <li><strong>Otomatik Veri Akışı ve Yenileme:</strong> "Yenile" butonu, n8n otomasyonunu tetikleyerek Google Form yanıtlarını işler, AI değerlendirmesi yapar ve sonuçları Google Sheets'e yazar. Ardından, bu güncel veriler arayüze yansıtılır.</li>
-            </ul>
+            <!-- Teknoloji ve Araçlar -->
+            <div class="about-section">
+                <h3>Kullanılan Teknoloji ve Araçlar</h3>
+                <div class="tech-grid">
+                    <div class="tech-card" data-description="Web sayfasının temel iskeletini ve içeriğini oluşturmak için kullanıldı."><i class="fab fa-html5"></i><span>HTML</span></div>
+                    <div class="tech-card" data-description="Uygulamanın görsel tasarımını, renk paletini, tipografisini ve genel yerleşimini şekillendirmek için kullanıldı."><i class="fab fa-css3-alt"></i><span>CSS</span></div>
+                    <div class="tech-card" data-description="Kullanıcı etkileşimlerini yönetmek, dinamik içerik oluşturmak ve API entegrasyonlarını sağlamak için kullanıldı."><i class="fab fa-js-square"></i><span>JavaScript</span></div>
+                    <div class="tech-card" data-description="Google Sheets ve Google Forms ile sunucusuz bir backend oluşturmak, verileri okumak, işlemek ve otomasyonları tetiklemek için kullanıldı."><i class="fas fa-file-alt"></i><span>Google Apps Script</span></div>
+                    <div class="tech-card" data-description="Farklı servisler arasında karmaşık veri akışlarını ve otomasyonları (workflow) yönetmek için kullanıldı."><i class="fas fa-cogs"></i><span>n8n (self-host)</span></div>
+                    <div class="tech-card" data-description="Geliştirme aşamasında lokal sunucuyu (n8n) güvenli bir şekilde internete açarak webhook testlerini kolaylaştırmak için kullanıldı."><i class="fas fa-server"></i><span>ngrok</span></div>
+                    <div class="tech-card" data-description="Kodlama, problem çözme, optimizasyon ve yeni fikirler üretme gibi geliştirme sürecinin çeşitli aşamalarında aktif olarak destek alındı."><i class="fas fa-brain"></i><span>Gemini AI</span></div>
+                    <div class="tech-card" data-description="Projenin versiyon kontrolünü sağlamak, kod geçmişini yönetmek ve projenin depolanması için kullanıldı."><i class="fab fa-github"></i><span>Github</span></div>
+                </div>
+            </div>
 
+            <!-- Proje Süreci ve Geliştirici Notları -->
+            <div class="about-section">
+                <h3>Proje Süreci ve Geliştirici Notları</h3>
+                <p>Bu proje, bir şirket case görevinin sonucu olarak yaklaşık 12 saatte geliştirilmiş bir aday değerlendirme platformudur. Çevik (Agile) metodoloji yaklaşımıyla, temel işlevselliklerden (aday listeleme, filtreleme) başlanarak ileriye dönük özellikler (karşılaştırma, detay profili, tema değiştirme) kademeli olarak eklendi. Geliştirme sürecinde Gemini AI ile işbirliği yapılarak, kod kalitesi optimize edilmiş ve en iyi pratikler uygulanmıştır. Sonuç olarak, üretim ortamında kullanılabilir, modern web teknolojileri ve otomasyon araçlarıyla entegre edilmiş tam işlevsel bir sistem elde edilmiştir.</p>
+            </div>
+
+            <!-- Öne Çıkan Özellikler -->
+            <div class="about-section">
+                <h3>Öne Çıkan Özellikler</h3>
+                <ul class="features-list">
+                    <li><i class="fas fa-users"></i> <strong>Dinamik Aday Listeleme:</strong> Adaylar, Google Sheets üzerinden anlık olarak çekilir.</li>
+                    <li><i class="fas fa-filter"></i> <strong>Gelişmiş Filtreleme ve Sıralama:</strong> Adaylar puana ve isme göre filtrelenip sıralanabilir.</li>
+                    <li><i class="fas fa-balance-scale"></i> <strong>Çoklu Aday Karşılaştırma:</strong> En fazla 6 aday seçilerek detaylı karşılaştırma yapılabilir.</li>
+                    <li><i class="fas fa-id-card"></i> <strong>Detaylı Aday Profili:</strong> Her adayın detaylı profili modal bir pencerede görüntülenebilir.</li>
+                    <li><i class="fas fa-palette"></i> <strong>Kullanıcı Dostu Arayüz:</strong> Koyu ve açık tema seçenekleri sunulmuştur.</li>
+                    <li><i class="fas fa-sync-alt"></i> <strong>Manuel Veri Akışı:</strong> "Yenile" butonu ile tüm veri akışı (AI değerlendirmesi dahil) tetiklenir.</li>
+                    <li><i class="fas fa-clock"></i> <strong>Periyodik Veri Akışı:</strong> Veri akışı 2 saatte bir otomatik olarak tetiklenir.</li>
+                </ul>
+            </div>
 
         </div>
     </main>
